@@ -173,7 +173,7 @@ func GetStatus(ip string) int {
 // GetTemperature will return the temperature property of a light on a given IP.
 func GetTemperature(ip string) int {
 	resp, _ := state(ip)
-	return resp.Lights[0].Brightness
+	return resp.Lights[0].Temperature
 }
 
 // GetBrightness will return the brightness property of a light on a given IP.
@@ -233,11 +233,11 @@ func SetStatusOn(ip string) (APIResponse, error) {
 func SetTemperature(ip string, value int) (APIResponse, error) {
 
 	if !valueProperties.IsNeutral {
-		b := GetBrightness(ip)
+		t := GetTemperature(ip)
 		if valueProperties.IsPositive {
-			value = b + value
+			value = t + value
 		} else if valueProperties.IsNegative {
-			value = b - value
+			value = t - value
 		}
 	}
 
