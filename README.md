@@ -17,11 +17,11 @@ Installation docs are on the way, but this will definitely make its way to the A
 
 **Flags**
 
-| Flag                                          | Description                                      |
-|-----------------------------------------------|--------------------------------------------------|
-| `--ip 192.168.0.60 --ip 192.168.0.61`         | IP addresses of your lights                      |
-| `--port 666`                                  | Port of the exposed IP addresses                 |
-| `--value +20` OR `--value _20` or `--value 20 | Value in which to set, increment or decrement by |
+| Flag                                            | Description                                      |
+|-------------------------------------------------|--------------------------------------------------|
+| `--ip 192.168.0.60 --ip 192.168.0.61`           | IP addresses of your lights                      |
+| `--port 666`                                    | Port of the exposed IP addresses                 |
+| `--value +20` OR `--value _20` or `--value 20`  | Value in which to set, increment or decrement by |
 
 **Commands**
 
