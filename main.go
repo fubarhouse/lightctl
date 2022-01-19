@@ -42,6 +42,8 @@ var (
 	destinationValue = app.Flag("value", "value to change to. ie. 40 || 600 || _40 || +40").String()
 	destinationIPs   = app.Flag("ip", "IP addresses, multiple supported").Default("10.0.0.90", "10.0.0.91").IPList()
 	destinationPort  = app.Flag("port", "Port to use, single value support only").Default("9123").String()
+
+	valueProperties = ValueProperties{}
 )
 
 type (
@@ -61,6 +63,14 @@ type (
 
 	// APIRequest matches our expected response.
 	APIRequest APIResponse
+
+	// ValueProperties describes the input value.
+	ValueProperties struct {
+		IsNegative bool
+		IsNeutral  bool
+		IsPositive bool
+		Value      int
+	}
 )
 
 // ErrBrightnessOuterBounds will return a custom error message for brightness limitations based on input.
@@ -71,6 +81,40 @@ func ErrBrightnessOuterBounds(value int) error {
 // ErrTemperatureOuterBounds will return a custom error message for temperature limitations based on input.
 func ErrTemperatureOuterBounds(value int) error {
 	return errors.New(fmt.Sprintf("Needs to be between %v and %v, was: %v", settingMinimumTemperature, settingMaximumTemperature, value))
+}
+
+// ParseValue will parse the input value to determine specific characteristics based upon text input.
+func ParseValue(value string) error {
+	if value == "" {
+		return nil
+	}
+	if strings.HasPrefix(*destinationValue, "+") {
+		valueProperties.IsPositive = true
+		trimmed := strings.TrimLeft(*destinationValue, "+")
+		value, err := strconv.Atoi(trimmed)
+		if err != nil {
+			return err
+		}
+		valueProperties.Value = value
+	} else if strings.HasPrefix(*destinationValue, "_") {
+		fmt.Println(3)
+		valueProperties.IsNegative = true
+		trimmed := strings.TrimLeft(*destinationValue, "_")
+		value, err := strconv.Atoi(trimmed)
+		if err != nil {
+			return err
+		}
+		fmt.Println(3)
+		valueProperties.Value = value
+	} else {
+		valueProperties.IsNeutral = true
+		value, err := strconv.Atoi(*destinationValue)
+		if err != nil {
+			return err
+		}
+		valueProperties.Value = value
+	}
+	return nil
 }
 
 // UnmarshalResponse will print an unmarshalled APIResponse.
@@ -187,6 +231,16 @@ func SetStatusOn(ip string) (APIResponse, error) {
 
 // SetTemperature will set a light on a given IP to a specific temperature value.
 func SetTemperature(ip string, value int) (APIResponse, error) {
+
+	if !valueProperties.IsNeutral {
+		b := GetBrightness(ip)
+		if valueProperties.IsPositive {
+			value = b + value
+		} else if valueProperties.IsNegative {
+			value = b - value
+		}
+	}
+
 	if value < 143 || value > 344 {
 		return APIResponse{}, ErrTemperatureOuterBounds(value)
 	}
@@ -200,19 +254,6 @@ func SetTemperature(ip string, value int) (APIResponse, error) {
 	}
 
 	return DispatchResponse(ip, Request, "lights", "PUT")
-}
-
-// AddBrightness will increase a light on a given IP by a specific brightness value.
-func AddBrightness(ip string, value int) (APIResponse, error) {
-	curr := GetBrightness(ip)
-	return SetBrightness(ip, curr+value)
-}
-
-// MinusBrightness will decrease a light on a given IP by a specific brightness value.
-// todo not working.
-func MinusBrightness(ip string, value int) (APIResponse, error) {
-	curr := GetBrightness(ip)
-	return SetBrightness(ip, curr-value)
 }
 
 // AddTemperature will increase a light on a given IP by a specific temperature value.
@@ -230,6 +271,16 @@ func MinusTemperature(ip string, value int) (APIResponse, error) {
 
 // SetBrightness will set a light on a given IP to a specific brightness value.
 func SetBrightness(ip string, value int) (APIResponse, error) {
+
+	if !valueProperties.IsNeutral {
+		b := GetBrightness(ip)
+		if valueProperties.IsPositive {
+			value = b + value
+		} else if valueProperties.IsNegative {
+			value = b - value
+		}
+	}
+
 	if value < 3 || value > 100 {
 		return APIResponse{}, ErrBrightnessOuterBounds(value)
 	}
@@ -291,52 +342,26 @@ func main() {
 		}
 
 	case brightness.FullCommand():
+		err := ParseValue(*destinationValue)
+		if err != nil {
+			fmt.Println(err)
+		}
 		for _, v := range *destinationIPs {
-			if strings.HasPrefix(*destinationValue, "+") {
-				newValueString := strings.TrimLeft(*destinationValue, "+")
-				newValue, _ := strconv.Atoi(newValueString)
-				_, err := AddBrightness(v.String(), newValue)
-				if err != nil {
-					fmt.Println(err)
-				}
-			} else if strings.HasPrefix(*destinationValue, "_") {
-				newValueString := strings.TrimLeft(*destinationValue, "_")
-				newValue, _ := strconv.Atoi(newValueString)
-				_, err := MinusBrightness(*destinationValue, newValue)
-				if err != nil {
-					fmt.Println(err)
-				}
-			} else {
-				newValue, _ := strconv.Atoi(*destinationValue)
-				_, err := SetBrightness(v.String(), newValue)
-				if err != nil {
-					fmt.Println(err)
-				}
+			_, err := SetBrightness(v.String(), valueProperties.Value)
+			if err != nil {
+				fmt.Println(err)
 			}
 		}
 
 	case temperature.FullCommand():
+		err := ParseValue(*destinationValue)
+		if err != nil {
+			fmt.Println(err)
+		}
 		for _, v := range *destinationIPs {
-			if strings.HasPrefix(*destinationValue, "+") {
-				newValueString := strings.TrimLeft(*destinationValue, "+")
-				newValue, _ := strconv.Atoi(newValueString)
-				_, err := AddTemperature(v.String(), newValue)
-				if err != nil {
-					fmt.Println(err)
-				}
-			} else if strings.HasPrefix(*destinationValue, "_") {
-				newValueString := strings.TrimLeft(*destinationValue, "_")
-				newValue, _ := strconv.Atoi(newValueString)
-				_, err := MinusTemperature(*destinationValue, newValue)
-				if err != nil {
-					fmt.Println(err)
-				}
-			} else {
-				newValue, _ := strconv.Atoi(*destinationValue)
-				_, err := SetTemperature(v.String(), newValue)
-				if err != nil {
-					fmt.Println(err)
-				}
+			_, err := SetTemperature(v.String(), valueProperties.Value)
+			if err != nil {
+				fmt.Println(err)
 			}
 		}
 	}
