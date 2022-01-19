@@ -256,19 +256,6 @@ func SetTemperature(ip string, value int) (APIResponse, error) {
 	return DispatchResponse(ip, Request, "lights", "PUT")
 }
 
-// AddTemperature will increase a light on a given IP by a specific temperature value.
-func AddTemperature(ip string, value int) (APIResponse, error) {
-	curr := GetTemperature(ip)
-	return SetTemperature(ip, curr+value)
-}
-
-// MinusTemperature will decrease a light on a given IP by a specific temperature value.
-// todo not working.
-func MinusTemperature(ip string, value int) (APIResponse, error) {
-	curr := GetTemperature(ip)
-	return SetTemperature(ip, curr-value)
-}
-
 // SetBrightness will set a light on a given IP to a specific brightness value.
 func SetBrightness(ip string, value int) (APIResponse, error) {
 
