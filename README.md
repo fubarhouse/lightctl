@@ -17,30 +17,23 @@ Installation docs are on the way, but this will definitely make its way to the A
 
 **Flags**
 
-| Flag                                  | Description                                      |
-|---------------------------------------|--------------------------------------------------|
-| `--ip 192.168.0.60 --ip 192.168.0.61` | IP addresses of your lights                      |
-| `--port 666`                          | Port of the exposed IP addresses                 |
-| `--value +20`                         | Value in which to set, increment or decrement by |
-
-**Note**: Decreasing a value is currently not working.
+| Flag                                          | Description                                      |
+|-----------------------------------------------|--------------------------------------------------|
+| `--ip 192.168.0.60 --ip 192.168.0.61`         | IP addresses of your lights                      |
+| `--port 666`                                  | Port of the exposed IP addresses                 |
+| `--value +20` OR `--value _20` or `--value 20 | Value in which to set, increment or decrement by |
 
 **Commands**
 
-| Command                          | Description                                                                                                                            |
-|----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| `lightctl on`                    | Turns each light on.                                                                                                                   |
-| `lightctl off`                   | Turns each light off.                                                                                                                  |
-| `lightctl toggle`                | Toggles each light to an on or off state.                                                                                              |
-| `lightctl info`                  | Show some information from the `accessory-info` uri on the API.                                                                        |
-| `lightctl state`                 | Show some information from the `light` usi on the endpoint                                                                             |
-| `lightctl brightness --value x`  | Set the value of brightness to a specific value such as `20`, `-10` or `+10`<br />Note: Negative value input does not work right now.  |
-| `lightctl temperature --value x` | Set the value of temperature to a specific value such as `20`, `-10` or `+10`<br />Note: Negative value input does not work right now. |
-
-
-## Known issues
-
-- Setting a value intended to decrease the current value results in a failure and the device turns off.
+| Command                          | Description                                                                   |
+|----------------------------------|-------------------------------------------------------------------------------|
+| `lightctl on`                    | Turns each light on.                                                          |
+| `lightctl off`                   | Turns each light off.                                                         |
+| `lightctl toggle`                | Toggles each light to an on or off state.                                     |
+| `lightctl info`                  | Show some information from the `accessory-info` uri on the API.               |
+| `lightctl state`                 | Show some information from the `light` usi on the endpoint                    |
+| `lightctl brightness --value x`  | Set the value of brightness to a specific value such as `20`, `_10` or `+10`  |
+| `lightctl temperature --value x` | Set the value of temperature to a specific value such as `20`, `_10` or `+10` |
 
 ## License
 
